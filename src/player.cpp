@@ -1,5 +1,6 @@
 #include "player.h"
 #include "physics.h"
+#include <iostream>
 
 Player::Player(Vector3 pos)
     : GameObject(pos) {
@@ -16,14 +17,21 @@ void Player::setRadius(float r) {
 }
 
 bool Player::isOnGround(BoundingBox &box) {
-    if (CheckCollisionBoxSphere(box, position, playerRadius))
+    if (CheckCollisionBoxSphere(box, position, playerRadius)) {
+        std::cout << "collided!" << std::endl;
         grounded = true;
+        velocity.y = 0.0f;
+    }
     return grounded;
 }
 
 void Player::Update(float deltaTime, BoundingBox &ground) {
-    if (!isOnGround(ground))
+    if (!grounded) {
         Physics::ApplyGravity(velocity.y, deltaTime, 9.8);
+        isOnGround(ground);
+    }
+
+    // Physics::ApplyGravity(velocity.y, deltaTime, 9.8);
     // Update position
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;

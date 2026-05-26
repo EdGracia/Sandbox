@@ -3,7 +3,7 @@
 #include "raylib.h"
 class Player : public GameObject {
     private:
-        Vector3 velocity;
+        Vector3 velocity = {0.0f, 0.0f, 0.0f};
         float playerRadius = 1.0f;
 
         Mesh mesh;
@@ -16,6 +16,7 @@ class Player : public GameObject {
 
         Model getModel();
         float getRadius();
+        Vector3 getVelocity() { return velocity; };
         void setRadius(float r);
         bool isOnGround(BoundingBox &box);
 

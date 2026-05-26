@@ -32,7 +32,7 @@ int main(void) {
     Model floorModel = LoadModelFromMesh(floorMesh);
     BoundingBox floorBox = GetModelBoundingBox(floorModel);
 
-    Player newPlayer({0.0f, 10.0f, -5.0f});
+    Player newPlayer({0.0f, 5.0f, -5.0f});
     newPlayer.setRadius(0.7f);
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
