@@ -4,7 +4,8 @@
 class Player : public GameObject {
     private:
         Vector3 velocity = {0.0f, 0.0f, 0.0f};
-        float moveSpeed = 2.0f;
+        float moveSpeed = 20.0f;
+        float friction = 2.5f; // smoother the lower it is
         float playerRadius = 1.0f;
 
         Mesh mesh;

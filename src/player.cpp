@@ -1,5 +1,7 @@
 #include "player.h"
 #include "physics.h"
+#include "raymath.h"
+#include <cmath>
 #include <iostream>
 
 Player::Player(Vector3 pos)
@@ -21,30 +23,35 @@ bool Player::isOnGround(BoundingBox &box) {
         std::cout << "collided!" << std::endl;
         grounded = true;
         velocity.y = 0.0f;
+    } else {
+        grounded = false;
     }
     return grounded;
 }
 
 void Player::handleInput(float deltaTime) {
     if (IsKeyDown(KEY_A)) {
-        velocity.x -= moveSpeed;
+        velocity.x -= moveSpeed * deltaTime;
     } else if (IsKeyDown(KEY_D)) {
-        velocity.x += moveSpeed;
+        velocity.x += moveSpeed * deltaTime;
     } else if (IsKeyDown(KEY_W)) {
-        velocity.z -= moveSpeed;
+        velocity.z -= moveSpeed * deltaTime;
     } else if (IsKeyDown(KEY_S)) {
-        velocity.z += moveSpeed;
+        velocity.z += moveSpeed * deltaTime;
+    } else if (IsKeyDown(KEY_R)) {
+        position = {0.0f, 10.0f, 0.0f};
+        velocity = Vector3Zero();
     } else {
-        velocity.x = 0;
-        velocity.z = 0;
+        velocity.x *= exp(-friction * deltaTime);
+        velocity.z *= exp(-friction * deltaTime);
     }
 }
 
 void Player::Update(float deltaTime, BoundingBox &ground) {
     handleInput(deltaTime);
+    isOnGround(ground);
     if (!grounded) {
         Physics::ApplyGravity(velocity.y, deltaTime, 9.8);
-        isOnGround(ground);
     }
 
     // Physics::ApplyGravity(velocity.y, deltaTime, 9.8);

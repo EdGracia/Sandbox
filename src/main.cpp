@@ -43,7 +43,7 @@ int main(void) {
     Player newPlayer({0.0f, 5.0f, -5.0f});
     newPlayer.setRadius(0.7f);
 
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    // SetTargetFPS(60); // Set our game to run at 60 frames-per-second
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -62,7 +62,7 @@ int main(void) {
         ClearBackground(DARKGRAY);
 
         BeginMode3D(camera);
-        DrawCubeV(floorPosition, floorSize, WHITE);
+        DrawModel(floorModel, floorPosition, 1.0f, WHITE);
         DrawModel(cube, cubePosition, 1.0f, RED);
         DrawModel(newPlayer.getModel(), newPlayer.getPosition(), 1.0f, BLUE);
         DrawModelWires(cube, cubePosition, 1.0f, PINK);
