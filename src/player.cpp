@@ -30,6 +30,16 @@ bool Player::isOnGround(BoundingBox &box) {
 }
 
 void Player::handleInput(float deltaTime) {
+    if (!grounded) {
+        return;
+    }
+
+    if (IsKeyPressed(KEY_SPACE)) {
+        if (grounded) { // prevents double jump
+            grounded = false;
+            velocity.y += jumpForce;
+        }
+    }
     if (IsKeyDown(KEY_A)) {
         velocity.x -= moveSpeed * deltaTime;
     } else if (IsKeyDown(KEY_D)) {
@@ -48,8 +58,8 @@ void Player::handleInput(float deltaTime) {
 }
 
 void Player::Update(float deltaTime, BoundingBox &ground) {
-    handleInput(deltaTime);
     isOnGround(ground);
+    handleInput(deltaTime);
     if (!grounded) {
         Physics::ApplyGravity(velocity.y, deltaTime, 9.8);
     }
