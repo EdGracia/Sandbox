@@ -1,9 +1,17 @@
 #include "player.h"
 #include "raylib.h"
 #include "raymath.h"
+
 #include <iostream>
 
 using namespace std;
+
+void drawCoordinates(GameObject &object, const int xPos, const int yPos) {
+    Vector3 position = object.getPosition();
+    DrawText(TextFormat("%.2f", position.x), xPos, yPos, 20, BLACK);
+    DrawText(TextFormat(", %.2f", position.y), xPos + 50, yPos, 20, BLACK);
+    DrawText(TextFormat(", %.2f", position.z), xPos + 100, yPos, 20, BLACK);
+}
 
 int main(void) {
     // Initialization
@@ -51,15 +59,19 @@ int main(void) {
         // Draw
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(DARKGRAY);
 
         BeginMode3D(camera);
         DrawCubeV(floorPosition, floorSize, WHITE);
         DrawModel(cube, cubePosition, 1.0f, RED);
         DrawModel(newPlayer.getModel(), newPlayer.getPosition(), 1.0f, BLUE);
         DrawModelWires(cube, cubePosition, 1.0f, PINK);
-        DrawGrid(20, 1.0f);
+        // DrawGrid(20, 1.0f);
         EndMode3D();
+        DrawText("Player Position: ", 10, 30, 20, BLACK);
+        drawCoordinates(newPlayer, 10, 50);
+
+        DrawFPS(10, 10);
 
         EndDrawing();
     }

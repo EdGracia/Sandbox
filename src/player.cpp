@@ -25,7 +25,23 @@ bool Player::isOnGround(BoundingBox &box) {
     return grounded;
 }
 
+void Player::handleInput(float deltaTime) {
+    if (IsKeyDown(KEY_A)) {
+        velocity.x -= moveSpeed;
+    } else if (IsKeyDown(KEY_D)) {
+        velocity.x += moveSpeed;
+    } else if (IsKeyDown(KEY_W)) {
+        velocity.z -= moveSpeed;
+    } else if (IsKeyDown(KEY_S)) {
+        velocity.z += moveSpeed;
+    } else {
+        velocity.x = 0;
+        velocity.z = 0;
+    }
+}
+
 void Player::Update(float deltaTime, BoundingBox &ground) {
+    handleInput(deltaTime);
     if (!grounded) {
         Physics::ApplyGravity(velocity.y, deltaTime, 9.8);
         isOnGround(ground);

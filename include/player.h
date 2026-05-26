@@ -4,6 +4,7 @@
 class Player : public GameObject {
     private:
         Vector3 velocity = {0.0f, 0.0f, 0.0f};
+        float moveSpeed = 2.0f;
         float playerRadius = 1.0f;
 
         Mesh mesh;
@@ -19,6 +20,7 @@ class Player : public GameObject {
         Vector3 getVelocity() { return velocity; };
         void setRadius(float r);
         bool isOnGround(BoundingBox &box);
+        void handleInput(float deltaTime);
 
         void Update(float deltaTime, BoundingBox &ground);
 };
