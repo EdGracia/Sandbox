@@ -2,33 +2,27 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#include <iostream>
-
-using namespace std;
-
-void drawCoordinates(GameObject &object, const int xPos, const int yPos) {
-    Vector3 position = object.getPosition();
-    DrawText(TextFormat("%.2f", position.x), xPos, yPos, 20, BLACK);
-    DrawText(TextFormat(", %.2f", position.y), xPos + 50, yPos, 20, BLACK);
-    DrawText(TextFormat(", %.2f", position.z), xPos + 100, yPos, 20, BLACK);
+void drawCoordinates(Vector3 position, const int xPos, const int yPos) {
+    DrawText(TextFormat("%.1f", position.x), xPos, yPos, 20, BLACK);
+    DrawText(TextFormat(", %.1f", position.y), xPos + 50, yPos, 20, BLACK);
+    DrawText(TextFormat(", %.1f", position.z), xPos + 100, yPos, 20, BLACK);
 }
 
 int main(void) {
-    // Initialization
-    const int screenWidth = GetScreenWidth();
-    const int screenHeight = GetScreenHeight();
+    InitWindow(0, 0, "sandbox");
 
-    InitWindow(screenWidth, screenHeight, "sandbox");
+    Camera3D camera = {};
+    camera.up = {0.0f, 1.0f, 0.0f};
+    camera.fovy = 60.0f;
+    camera.projection = CAMERA_PERSPECTIVE;
 
-    // Define the camera to look into our 3d world
-    Camera3D camera;
-    camera.position = (Vector3){0.0f, 20.0f, 20.0f}; // Camera position
-    camera.target = (Vector3){0.0f, 0.0f, 0.0f};     // Camera looking at point
-    camera.up = (Vector3){0.0f, 1.0f, 0.0f};         //(rotation towards target)
-    camera.fovy = 60.0f;                             // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;          // Camera mode type
+    // Third-person camera state
+    float cameraYaw = 0.0f;   // radians, horizontal
+    float cameraPitch = 0.4f; // radians, vertical (positive = above player)
+    float cameraDistance = 15.0f;
+    const float sensitivity = 0.003f;
 
-    // floating cube
+    // Floating cube
     Vector3 cubePosition = {0.0f, 0.0f, 0.0f};
     Mesh cubeMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
     Model cube = LoadModelFromMesh(cubeMesh);
@@ -39,48 +33,65 @@ int main(void) {
     Mesh floorMesh = GenMeshCube(floorSize.x, floorSize.y, floorSize.z);
     Model floorModel = LoadModelFromMesh(floorMesh);
     BoundingBox floorBox = GetModelBoundingBox(floorModel);
+    // GetModelBoundingBox returns model-space coords; translate to world space.
+    floorBox.min = Vector3Add(floorBox.min, floorPosition);
+    floorBox.max = Vector3Add(floorBox.max, floorPosition);
 
-    Player newPlayer({0.0f, 5.0f, -5.0f});
+    Player newPlayer({0.0f, 5.0f, 0.0f});
     newPlayer.setRadius(0.7f);
 
-    // SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);
+    DisableCursor();
 
-    // Main game loop
-    while (!WindowShouldClose()) // Detect window close button or ESC key
-    {
-        // Update
+    while (!WindowShouldClose()) {
+        float deltaTime = GetFrameTime();
 
-        float dt = GetFrameTime();
-        newPlayer.Update(dt, floorBox);
+        // Update camera angles from mouse
+        cameraYaw += GetMouseDelta().x * sensitivity;
+        cameraPitch -= GetMouseDelta().y * sensitivity;
+        if (cameraPitch > 1.3f)
+            cameraPitch = 1.3f; // ~75 deg up
+        if (cameraPitch < 0.05f)
+            cameraPitch = 0.05f; // keep camera above floor
 
-        rotation += 60.0f * GetFrameTime();
+        newPlayer.Update(deltaTime, floorBox, cameraYaw);
+        Vector3 playerPos = newPlayer.getPosition();
+
+        // Orbit camera around player
+        camera.position = {
+            playerPos.x + cameraDistance * sinf(cameraYaw) * cosf(cameraPitch),
+            playerPos.y + cameraDistance * sinf(cameraPitch),
+            playerPos.z + cameraDistance * cosf(cameraYaw) * cosf(cameraPitch)};
+        camera.target = {playerPos.x, playerPos.y + 1.0f, playerPos.z};
+
+        rotation += 60.0f * deltaTime;
         cube.transform = MatrixRotateY(DEG2RAD * rotation);
 
-        // Draw
         BeginDrawing();
-
         ClearBackground(DARKGRAY);
 
         BeginMode3D(camera);
         DrawModel(floorModel, floorPosition, 1.0f, WHITE);
+        DrawModelWires(floorModel, floorPosition, 1.0f, GRAY);
         DrawModel(cube, cubePosition, 1.0f, RED);
-        DrawModel(newPlayer.getModel(), newPlayer.getPosition(), 1.0f, BLUE);
-        DrawModelWires(cube, cubePosition, 1.0f, PINK);
-        // DrawGrid(20, 1.0f);
+        DrawModelWires(cube, cubePosition, 1.0f, MAROON);
+        DrawModel(newPlayer.getModel(), playerPos, 1.0f, BLUE);
+        DrawModelWires(newPlayer.getModel(), playerPos, 1.0f, DARKBLUE);
         EndMode3D();
-        DrawText("Player Position: ", 10, 30, 20, BLACK);
-        drawCoordinates(newPlayer, 10, 50);
 
         DrawFPS(10, 10);
+        DrawText("Player Position: ", 10, 30, 20, BLACK);
+        drawCoordinates(playerPos, 10, 50);
+        DrawText(
+            TextFormat("Camera Yaw: %.2f  Pitch: %.2f", cameraYaw, cameraPitch),
+            10, 70, 20, BLACK);
 
         EndDrawing();
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
     UnloadModel(cube);
-    CloseWindow(); // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    UnloadModel(floorModel);
+    CloseWindow();
 
     return 0;
 }
