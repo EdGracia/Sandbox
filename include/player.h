@@ -5,6 +5,7 @@ class Player : public GameObject {
     private:
         Vector3 velocity = {0.0f, 0.0f, 0.0f};
         float moveSpeed = 20.0f;
+        float airMoveSpeed = moveSpeed / 4.0f;
         float maxHorizontalSpeed = 8.0f;
         float jumpForce = 10.0f;
         float friction = 3.5f;

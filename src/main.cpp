@@ -43,6 +43,7 @@ int main(void) {
     SetTargetFPS(60);
     DisableCursor();
 
+    // Main Game Loop
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 

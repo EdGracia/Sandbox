@@ -29,12 +29,17 @@ bool Player::isOnGround(BoundingBox &box) {
 }
 
 void Player::handleInput(float deltaTime, float cameraYaw) {
+    // Reset player if falls to void
     if (IsKeyDown(KEY_R)) {
         position = {0.0f, 10.0f, 0.0f};
         velocity = Vector3Zero();
     }
 
-    if (!grounded) return;
+    // Slows movement in the air
+    if (!grounded)
+        moveSpeed = airMoveSpeed;
+    else
+        moveSpeed = 20.0f;
 
     if (IsKeyPressed(KEY_SPACE)) {
         grounded = false;
@@ -44,14 +49,26 @@ void Player::handleInput(float deltaTime, float cameraYaw) {
     // Movement vectors relative to camera yaw
     float fwdX = -sinf(cameraYaw);
     float fwdZ = -cosf(cameraYaw);
-    float rgtX =  cosf(cameraYaw);
+    float rgtX = cosf(cameraYaw);
     float rgtZ = -sinf(cameraYaw);
 
     float moveX = 0.0f, moveZ = 0.0f;
-    if (IsKeyDown(KEY_W)) { moveX += fwdX; moveZ += fwdZ; }
-    if (IsKeyDown(KEY_S)) { moveX -= fwdX; moveZ -= fwdZ; }
-    if (IsKeyDown(KEY_A)) { moveX -= rgtX; moveZ -= rgtZ; }
-    if (IsKeyDown(KEY_D)) { moveX += rgtX; moveZ += rgtZ; }
+    if (IsKeyDown(KEY_W)) {
+        moveX += fwdX;
+        moveZ += fwdZ;
+    }
+    if (IsKeyDown(KEY_S)) {
+        moveX -= fwdX;
+        moveZ -= fwdZ;
+    }
+    if (IsKeyDown(KEY_A)) {
+        moveX -= rgtX;
+        moveZ -= rgtZ;
+    }
+    if (IsKeyDown(KEY_D)) {
+        moveX += rgtX;
+        moveZ += rgtZ;
+    }
 
     if (moveX != 0.0f || moveZ != 0.0f) {
         float len = sqrtf(moveX * moveX + moveZ * moveZ);
@@ -74,7 +91,7 @@ void Player::Update(float deltaTime, BoundingBox &ground, float cameraYaw) {
     isOnGround(ground);
     handleInput(deltaTime, cameraYaw);
     if (!grounded) {
-        Physics::ApplyGravity(velocity.y, deltaTime, 9.8f);
+        Physics::ApplyGravity(velocity.y, deltaTime, 15.0f);
     }
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
