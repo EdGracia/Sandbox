@@ -41,16 +41,25 @@ void Player::handleInput(float deltaTime, float cameraYaw) {
     else
         moveSpeed = 20.0f;
 
-    if (IsKeyPressed(KEY_SPACE)) {
-        grounded = false;
-        velocity.y += jumpForce;
-    }
-
     // Movement vectors relative to camera yaw
     float fwdX = -sinf(cameraYaw);
     float fwdZ = -cosf(cameraYaw);
     float rgtX = cosf(cameraYaw);
     float rgtZ = -sinf(cameraYaw);
+
+    if (IsKeyPressed(KEY_SPACE)) {
+        grounded = false;
+        velocity.y += jumpForce;
+    }
+
+    // Dash: horizontal speed burst in the facing direction, only while airborne
+    dashCooldownTimer -= deltaTime;
+    if (IsKeyPressed(KEY_LEFT_SHIFT) && !grounded &&
+        dashCooldownTimer <= 0.0f) {
+        velocity.x = lastMoveDirX * dashSpeed;
+        velocity.z = lastMoveDirZ * dashSpeed;
+        dashCooldownTimer = dashCooldown;
+    }
 
     float moveX = 0.0f, moveZ = 0.0f;
     if (IsKeyDown(KEY_W)) {
@@ -72,8 +81,10 @@ void Player::handleInput(float deltaTime, float cameraYaw) {
 
     if (moveX != 0.0f || moveZ != 0.0f) {
         float len = sqrtf(moveX * moveX + moveZ * moveZ);
-        velocity.x += (moveX / len) * moveSpeed * deltaTime;
-        velocity.z += (moveZ / len) * moveSpeed * deltaTime;
+        lastMoveDirX = moveX / len;
+        lastMoveDirZ = moveZ / len;
+        velocity.x += lastMoveDirX * moveSpeed * deltaTime;
+        velocity.z += lastMoveDirZ * moveSpeed * deltaTime;
         // Clamp horizontal speed
         float hSpeed = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
         if (hSpeed > maxHorizontalSpeed) {

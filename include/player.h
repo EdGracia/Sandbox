@@ -16,6 +16,12 @@ class Player : public GameObject {
 
         bool grounded = false;
 
+        float dashSpeed = 18.0f;
+        float dashCooldown = 0.8f;
+        float dashCooldownTimer = 0.0f;
+        float lastMoveDirX = 0.0f;
+        float lastMoveDirZ = -1.0f;
+
     public:
         Player(Vector3 pos = {0.0f, 0.0f, 0.0f});
 
